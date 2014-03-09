@@ -3,8 +3,12 @@ package edu.sjsu.cmpe.library.repository;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.ws.rs.PathParam;
+
+import edu.sjsu.cmpe.library.domain.Author;
 import edu.sjsu.cmpe.library.domain.Book;
 
 public class BookRepository implements BookRepositoryInterface {
@@ -13,6 +17,7 @@ public class BookRepository implements BookRepositoryInterface {
 
     /** Never access this key directly; instead use generateISBNKey() */
     private long isbnKey;
+    private long authorId;
 
     public BookRepository(ConcurrentHashMap<Long, Book> bookMap) {
 	checkNotNull(bookMap, "bookMap must not be null for BookRepository");
@@ -39,7 +44,14 @@ public class BookRepository implements BookRepositoryInterface {
 	checkNotNull(newBook, "newBook instance must not be null");
 	// Generate new ISBN
 	Long isbn = generateISBNKey();
+	//String status = @PathParam(status);
 	newBook.setIsbn(isbn);
+	//newBook.setStatus(status);
+	ArrayList<Author> authors = newBook.getAuthors();
+	for(int i=0;i < authors.size(); i++){
+		authors.get(i).setId(++authorId);
+	}
+	
 	// TODO: create and associate other fields such as author
 
 	// Finally, save the new book into the map
@@ -57,5 +69,11 @@ public class BookRepository implements BookRepositoryInterface {
 		"ISBN was %s but expected greater than zero value", isbn);
 	return bookInMemoryMap.get(isbn);
     }
+    
+    public void deletebook(Long isbn) {
+    	checkArgument(isbn > 0,
+    		"ISBN was %s but expected greater than zero value", isbn);
+    	 bookInMemoryMap.remove(isbn);
+        }
 
 }
